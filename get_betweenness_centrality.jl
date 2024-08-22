@@ -1,7 +1,6 @@
 using CSV
 using DataFrames
 using Graphs
-using Revise
 using XLSX
 
 
@@ -91,7 +90,16 @@ function build_centralities_subgroup(
     
     graph = graph_wrapper.graph
     df_base = filter(x -> !ismissing(x[field_subtype]), df)
-    all_subtypes = sort(unique(df_base[:, field_subtype]))
+    all_subtypes = collect(sort(unique(df_base[:, field_subtype])))
+
+    # try converting
+    try 
+        all_subtypes = String.(all_subtypes)
+    catch e
+        @info "Error converting type to String in build_centralities_subgroup(): trying to conver to Symbol, then String..."
+        all_subtypes = String.(Symbol.(all_subtypes))
+        @info "Success."
+    end
     
     # set matrix
     new_mat = zeros(Float64, graph_wrapper.dims[1], length(all_subtypes))
