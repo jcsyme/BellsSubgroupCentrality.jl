@@ -89,42 +89,79 @@ function build_centralities_subgroup(
 )
     
     graph = graph_wrapper.graph
-    df_base = filter(x -> !ismissing(x[field_subtype]), df)
-    all_subtypes = collect(sort(unique(df_base[:, field_subtype])))
 
-    # try converting
+    df_base = copy(df)
+    filter!(x -> !ismissing(x[field_subtype]), df_base)
+   
+    # try converting types
     try 
-        all_subtypes = String.(all_subtypes)
+        df_base[!, field_subtype] = String.(df_base[:, field_subtype])
+
     catch e
-        @info "Error converting type to String in build_centralities_subgroup(): trying to conver to Symbol, then String..."
-        all_subtypes = String.(Symbol.(all_subtypes))
+        @info "Error converting type to String in build_centralities_subgroup(): trying to convert to Symbol, then String..."
+
+        df_base[!, field_subtype] = String.(
+            Symbol.(
+                df_base[:, field_subtype]
+            )
+        )
+
         @info "Success."
     end
+
+    all_subtypes = collect(sort(unique(df_base[:, field_subtype])))
     
     # set matrix
-    new_mat = zeros(Float64, graph_wrapper.dims[1], length(all_subtypes))
-    
+    n_col = length(all_subtypes)*3 + 1
+    new_mat = zeros(Float64, graph_wrapper.dims[1], n_col)
+    new_mat_fields = Vector{String}(["" for x in 1:n_col])
+    new_mat_fields[1] = "betweenness_centrality"
+
+    # calculate betweenness centrality for each vertex
+    vec_betweenness = betweenness_centrality(
+        graph;
+        normalize = false,
+    )
+    new_mat[:, 1] = vec_betweenness
+
     # iterate over available subtypes
     for (j, subtype) in enumerate(all_subtypes)
         
-        verts_group = get_verts_by_type(
+        # get matrix indices and fields
+        inds = 3*j - 2 .+ collect(1:3)
+        fields = build_subtype_names(subtype)
+
+        verts_group, verts_complement = get_verts_by_type(
             df_base,
             graph_wrapper,
             subtype;
             field = field_subtype,
         )
-
-        vec = betweenness_centrality_subgroup(
+        
+        # get local centrality (B_s) 
+        vec_local = betweenness_centrality_subgroup(
             graph,
             verts_group;
             normalize = false,
         )
+
+        # get global centrality (B_s^C) 
+        vec_global = betweenness_centrality_subgroup(
+            graph,
+            verts_complement;
+            normalize = false,
+        )
         
-        new_mat[:, j] = vec # ordered by graph
+        # local, global, and boundary
+        new_mat[:, inds[1]] = vec_local # ordered by graph
+        new_mat[:, inds[2]] = vec_global # ordered by graph
+        new_mat[:, inds[3]] = vec_betweenness .- vec_local .- vec_global # ordered by graph
+        
+        new_mat_fields[inds[1]:inds[3]] = fields
     end
     
     # build matrix out
-    new_mat = DataFrame(new_mat, Symbol.(all_subtypes))
+    new_mat = DataFrame(new_mat, Symbol.(new_mat_fields))
     new_mat[:, field_key] = graph_wrapper.vertex_names
     
     df_base = leftjoin(
@@ -134,6 +171,22 @@ function build_centralities_subgroup(
     )
     
     return df_base
+end
+
+
+
+function build_subtype_names(
+    subtype::String,
+)
+    out = [
+        "local_bs",
+        "global_bsc",
+        "boundary_bbs"
+    ]
+
+    out = ["$(subtype)_$(x)" for x in out]
+
+    return out
 end
 
 
@@ -197,9 +250,9 @@ function get_verts_by_type(
     )
     
     verts_complement = setdiff(vertices(graph_wrapper.graph), verts);
-    
-    return verts_complement
-    
+    out = (verts, verts_complement)
+
+    return out
 end
 
 
