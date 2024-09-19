@@ -3,10 +3,11 @@ using DataFrames
 using Graphs
 using XLSX
 
-
 # get the DiscreteGraphAlgorithms package - REQUIRED TO USE THESE FUNCTIONS
 using DiscreteGraphAlgorithms
 
+path = dirname(@__FILE__)
+include(joinpath(path, "bells_centrality.jl"))
 
 
 
@@ -139,23 +140,36 @@ function build_centralities_subgroup(
         )
         
         # get local centrality (B_s) 
-        vec_local = betweenness_centrality_subgroup(
-            graph,
-            verts_group;
-            normalize = false,
+        vec_local = betweenness_centrality_bells(
+            graph;
+            vertices_source = verts_group,
+            vertices_target = verts_group,
         )
 
         # get global centrality (B_s^C) 
-        vec_global = betweenness_centrality_subgroup(
-            graph,
-            verts_complement;
-            normalize = false,
+        vec_global = betweenness_centrality_bells(
+            graph;
+            vertices_source = verts_complement,
+            vertices_target = verts_complement,
+        )
+
+        # get boundary centrality (Bb_s) 
+        vec_boundary = betweenness_centrality_bells(
+            graph;
+            vertices_source = verts_group,
+            vertices_target = verts_complement,
+        )
+
+        vec_boundary += betweenness_centrality_bells(
+            graph;
+            vertices_source = verts_complement,
+            vertices_target = verts_group,
         )
         
         # local, global, and boundary
         new_mat[:, inds[1]] = vec_local # ordered by graph
         new_mat[:, inds[2]] = vec_global # ordered by graph
-        new_mat[:, inds[3]] = vec_betweenness .- vec_local .- vec_global # ordered by graph
+        new_mat[:, inds[3]] = vec_boundary # ordered by graph
         
         new_mat_fields[inds[1]:inds[3]] = fields
     end
@@ -266,7 +280,7 @@ end
 # Constructs
 
 ```
-write_subgroup_centralities(
+write_subgroup_centralities!(
     fp_in::String,
     fp_out::String,
     sheet_name_vertices::String,
