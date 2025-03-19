@@ -229,12 +229,13 @@ function _rescale_subgroup!(
             do_scale = false
         end
     end
+    
     if do_scale
         #if k > 0
         #    scale = scale * n / k
         #end
         
-        v_scale_in = Int64.(in.(1:n_v, (vs, )))
+        v_scale_in = Int64.(in.(1:n, (vs, )))
         v_scale_out = (v_scale_in .+ 1) .% 2
         scale = scale_in * v_scale_in + scale_out * v_scale_out
         
