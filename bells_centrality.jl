@@ -1,6 +1,6 @@
 
 """
-
+Recursively get paths 
 # Constructs
 
 get_paths(
@@ -14,6 +14,9 @@ get_paths(
 
 ##  Function Arguments
 
+states: vector of states 
+
+node: 
 
 ##  Keyword Arguments
 
