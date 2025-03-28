@@ -1,4 +1,4 @@
-name = "BellSubgroupCentrality"
+name = "BellsSubgroupCentrality"
 uuid = "747F73C9-3AF1-4C3A-853F-38AA7D8A99CE"
 authors = ["jsyme <jsyme.bus@gmail.com>"]
 version = "1.0.0"
