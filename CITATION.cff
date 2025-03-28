@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+title: BellsSubgroupCentrality.jl
+message: Suggested Citation
+type: software
+authors:
+  - email: jsyme@rand.org
+    given-names: James
+    family-names: Syme
+    affiliation: RAND
+repository-code: >-
+  MISSING
+url: MISSING
+abstract: >-
+  Calculation of Bells Subgroup Centralities, which can include betweenness
+  centrality scores both between and within different subgroups on a graph.
+license: MIT

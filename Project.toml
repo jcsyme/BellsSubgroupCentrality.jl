@@ -1,0 +1,10 @@
+name = "BellSubgroupCentrality"
+uuid = "747F73C9-3AF1-4C3A-853F-38AA7D8A99CE"
+authors = ["jsyme <jsyme.bus@gmail.com>"]
+version = "1.0.0"
+
+[deps]
+CodecZlib = "944b1d66-785c-5afd-91f1-9de20f533193"
+GraphIO = "aa1b3936-2fda-51b9-ab35-c553d3a640a2"
+Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
+ParserCombinator = "fae87a5f-d1ad-5cf0-8f61-c941e1580b46"
