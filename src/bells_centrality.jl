@@ -183,10 +183,16 @@ get_subgroup_centrality(
     * :overall or :o
 - `vertices_in_group`: vector of vertices that are considered in-group
 
+
 ##  Keyword Arguments
 
 - `vertices_out_group`: optional passage of outgroup vertices. Otherwise, 
     calculated as vertex set complement of in-groups
+
+
+##  Returns
+
+Ordered vector of subgroup centrality for vertices in graph.
 """
 function get_subgroup_centrality(
     graph::AbstractGraph,
@@ -303,6 +309,10 @@ subgroup_centrality_bells(
 - `vertices_source`: set of vertex indices to treat as sources 
 - `vertices_target`: set of vertex indices to treat as targets
 
+
+##  Returns
+
+Ordered vector of subgroup centrality for vertices in graph.
 """
 function subgroup_centrality_bells(
     graph::AbstractGraph;
